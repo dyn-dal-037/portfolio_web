@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dhyan Dalwadi — Robotics Researcher</title>
+<meta name="description" content="I build robots that understand their world — not just sense it. Perception-driven manipulation, task-aware grasping, sim-to-real transfer.">
+<meta property="og:title" content="Dhyan Dalwadi — Robotics Researcher">
+<meta property="og:description" content="Perception-driven manipulation · learning-based control · sim-to-real transfer.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<script>try{var __t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.dataset.theme=__t}catch(e){document.documentElement.dataset.theme='dark'}</script>
+<style>
+/* ════════ TOKENS ════════ */
+:root{
+  --bg-deep:#05080F;--bg-surface:#0A0F1E;--border:#1A2035;
+  --amber:#F5A623;--star-blue:#4A9EFF;
+  --text-primary:#EEF2FF;--text-muted:#8892A4;
+  --amber-glow:rgba(245,166,35,0.15);
+  --font-display:'Syne',sans-serif;--font-mono:'JetBrains Mono',monospace;--font-body:'Geist',sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg-deep);color:var(--text-primary);font-family:var(--font-body);
+  font-size:17px;line-height:1.6;overflow-x:hidden;cursor:none}
+::selection{background:var(--amber);color:var(--bg-deep)}
+a{color:inherit;text-decoration:none;cursor:none}
+button{cursor:none;font-family:inherit}
+img{max-width:100%;display:block}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--bg-deep)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;border:2px solid var(--bg-deep)}
+::-webkit-scrollbar-thumb:hover{background:var(--amber)}
+
+/* ════════ SCANLINE REVEAL ════════ */
+.scanveil{position:fixed;left:0;right:0;top:0;bottom:0;z-index:1000;background:#020407;
+  pointer-events:none;will-change:bottom}
+.scanveil.go{animation:veilSweep .95s cubic-bezier(.65,.05,.36,1) forwards}
+@keyframes veilSweep{
+  0%{bottom:0}
+  100%{bottom:100vh}
+}
+.scanline{position:fixed;left:0;right:0;top:0;z-index:1001;height:2px;
+  background:linear-gradient(90deg,transparent 0%,var(--star-blue) 12%,#9DCFFF 32%,var(--amber) 50%,#FFD89A 68%,var(--star-blue) 88%,transparent 100%);
+  box-shadow:0 0 24px rgba(245,166,35,.7),0 0 48px rgba(74,158,255,.55),0 0 80px rgba(245,166,35,.3);
+  opacity:0;will-change:transform,opacity;pointer-events:none}
+.scanline.go{animation:lineSweep .95s cubic-bezier(.65,.05,.36,1) forwards}
+@keyframes lineSweep{
+  0%{transform:translateY(0);opacity:0}
+  8%{opacity:1}
+  92%{opacity:1}
+  100%{transform:translateY(100vh);opacity:0}
+}
+.scanline::before{content:'';position:absolute;left:0;right:0;top:-90px;height:90px;pointer-events:none;
+  background:linear-gradient(to bottom,transparent,rgba(74,158,255,.10) 60%,rgba(245,166,35,.18) 100%);
+  filter:blur(8px)}
+.scan-tag{position:fixed;z-index:1002;left:50%;transform:translateX(-50%);
+  top:48vh;font-family:var(--font-mono);font-size:10px;letter-spacing:.4em;color:rgba(245,166,35,.85);
+  text-transform:uppercase;opacity:0;text-shadow:0 0 12px rgba(245,166,35,.5);will-change:opacity}
+.scan-tag.go{animation:tagBlink .95s linear forwards}
+@keyframes tagBlink{
+  0%{opacity:0}
+  20%{opacity:.9}
+  35%{opacity:.4}
+  50%{opacity:.9}
+  75%{opacity:.5}
+  100%{opacity:0}
+}
+.scan-noise{position:fixed;inset:0;z-index:1000;pointer-events:none;opacity:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay}
+.scan-noise.go{animation:noiseBlip .95s linear forwards}
+@keyframes noiseBlip{
+  0%,100%{opacity:0}
+  10%{opacity:.25}
+  50%{opacity:.12}
+  90%{opacity:.18}
+}
+
+/* ════════ GLOBAL CHROME ════════ */
+.grain{position:fixed;inset:-50%;width:200%;height:200%;z-index:90;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainShift 8s steps(10) infinite}
+@keyframes grainShift{0%,100%{transform:translate(0,0)}10%{transform:translate(-3%,2%)}30%{transform:translate(2%,-3%)}50%{transform:translate(-2%,-2%)}70%{transform:translate(3%,1%)}90%{transform:translate(-1%,3%)}}
+.scroll-progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:300;
+  background:linear-gradient(90deg,var(--amber),var(--star-blue));
+  box-shadow:0 0 12px rgba(245,166,35,.5)}
+
+/* ════════ CURSOR ════════ */
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;border-radius:50%;transform:translate(-50%,-50%)}
+.cursor-dot{width:6px;height:6px;background:var(--amber);transition:background .2s,width .15s,height .15s}
+.cursor-ring{width:34px;height:34px;border:1px solid rgba(245,166,35,.4);
+  transition:width .25s,height .25s,border-color .25s,background .25s}
+body.cursor-hover .cursor-ring{width:56px;height:56px;border-color:var(--star-blue);background:rgba(74,158,255,.06)}
+body.cursor-hover .cursor-dot{background:var(--star-blue)}
+body.cursor-down .cursor-ring{width:24px;height:24px}
+@media(hover:none){.cursor-dot,.cursor-ring{display:none}body,a,button{cursor:auto}}
+
+/* ════════ NAV ════════ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;
+  padding:22px 48px;opacity:0;transform:translateY(-16px);
+  animation:navIn .7s 1.25s var(--ease) forwards;
+  transition:background .4s,padding .4s,border-color .4s;border-bottom:1px solid transparent}
+nav.scrolled{background:rgba(5,8,15,.78);backdrop-filter:blur(14px);padding:14px 48px;border-bottom-color:var(--border)}
+@keyframes navIn{to{opacity:1;transform:none}}
+.nav-logo{font-family:var(--font-mono);font-size:13px;letter-spacing:.22em;color:var(--amber)}
+.nav-links{display:flex;gap:36px}
+.nav-links a{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--text-muted);transition:color .25s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-6px;left:0;width:0;height:1px;background:var(--amber);transition:width .3s var(--ease)}
+.nav-links a:hover{color:var(--text-primary)}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+.nav-links a.active{color:var(--amber)}
+.nav-burger{display:none;flex-direction:column;gap:6px;background:none;border:none;padding:10px;z-index:120}
+.nav-burger span{width:24px;height:1.5px;background:var(--text-primary);transition:transform .3s,opacity .3s}
+.nav-burger.open span:first-child{transform:translateY(4px) rotate(45deg)}
+.nav-burger.open span:last-child{transform:translateY(-3.5px) rotate(-45deg)}
+.mobile-menu{position:fixed;inset:0;z-index:99;background:rgba(5,8,15,.97);backdrop-filter:blur(12px);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:36px;
+  opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
+.mobile-menu.open{opacity:1;visibility:visible;transition-delay:0s}
+.mobile-menu a{font-family:var(--font-display);font-weight:700;font-size:32px;color:var(--text-muted);transition:color .25s}
+.mobile-menu a:hover{color:var(--amber)}
+@media(max-width:760px){.nav-burger{display:flex}.nav-links{display:none}nav{padding:18px 24px}nav.scrolled{padding:12px 24px}}
+
+/* ════════ HERO ════════ */
+.hero{min-height:100vh;position:relative;display:flex;flex-direction:column;justify-content:center;padding:0 48px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;opacity:0;animation:fadeIn 1.4s .2s ease forwards;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 120%,rgba(20,60,140,.40),transparent 65%),
+    radial-gradient(ellipse 70% 50% at 85% 10%,rgba(74,158,255,.10),transparent 60%),
+    linear-gradient(180deg,#04060C 0%,#081428 60%,#05080F 100%)}
+@keyframes fadeIn{to{opacity:1}}
+.plx{position:absolute;inset:0;z-index:0;will-change:transform}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);
+  opacity:0;animation:blobIn 2s 1.2s forwards,drift 16s ease-in-out infinite alternate}
+@keyframes blobIn{to{opacity:.55}}
+.blob-a{width:560px;height:560px;background:rgba(74,158,255,.20);top:-12%;right:-6%}
+.blob-b{width:460px;height:460px;background:rgba(245,166,35,.13);bottom:6%;left:-10%;animation-delay:1.2s,-8s}
+@keyframes drift{to{transform:translate(70px,50px) scale(1.12)}}
+/* OPTIONAL AI media slot:
+<img class="hero-media" src="hero.jpg" alt=""> or <video class="hero-media" src="hero.mp4" autoplay muted loop playsinline></video> */
+.hero-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.5;
+  mask-image:linear-gradient(180deg,#000 60%,transparent)}
+.hero-grid{position:absolute;inset:0;z-index:1;opacity:0;animation:fadeIn 2s 1.3s forwards;will-change:transform;
+  background-image:linear-gradient(rgba(74,158,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(74,158,255,.05) 1px,transparent 1px);
+  background-size:72px 72px;
+  mask-image:radial-gradient(ellipse 70% 60% at 50% 45%,#000 30%,transparent 75%)}
+#cloud{position:absolute;inset:0;z-index:1;opacity:0;animation:fadeIn 2.4s 1.4s forwards}
+.scan-label{position:absolute;z-index:2;font-family:var(--font-mono);font-size:9px;letter-spacing:.18em;
+  color:rgba(245,166,35,.6);text-transform:uppercase;pointer-events:none;white-space:nowrap;
+  opacity:0;animation:fadeIn 2s 2.6s forwards}
+@media(max-width:900px){.scan-label{display:none}}
+.hero-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse 120% 100% at 50% 50%,transparent 55%,rgba(3,5,10,.8) 100%)}
+.hero-content{position:relative;z-index:3;max-width:1100px;margin:0 auto;width:100%;will-change:transform}
+.hero-status{display:inline-flex;align-items:center;gap:9px;width:fit-content;
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-muted);border:1px solid var(--border);border-radius:999px;
+  padding:8px 16px;margin-bottom:26px;background:rgba(10,15,30,.55);backdrop-filter:blur(6px);
+  opacity:0;transform:translateY(14px);animation:riseIn .7s 1.35s var(--ease) forwards}
+.hero-status i{width:6px;height:6px;border-radius:50%;background:#3DDC84;
+  box-shadow:0 0 8px #3DDC84;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.hero-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--star-blue);
+  display:flex;align-items:center;gap:12px;opacity:0;transform:translateY(14px);
+  animation:riseIn .7s 1.45s var(--ease) forwards;min-height:17px}
+.hero-eyebrow::before{content:'';width:36px;height:1px;background:var(--star-blue);flex-shrink:0}
+@keyframes riseIn{to{opacity:1;transform:none}}
+.hero-name{font-family:var(--font-display);font-weight:700;font-size:clamp(56px,9.5vw,120px);line-height:.92;
+  margin:28px 0 0;letter-spacing:-.02em}
+.hero-name .line{display:block;overflow:hidden}
+.hero-name .line span{display:block;transform:translateY(110%);animation:clipReveal 1s 1.55s var(--ease) forwards}
+.hero-name .line:first-child span{
+  background:linear-gradient(110deg,#EEF2FF 35%,#9DB8E8 48%,#FFFFFF 52%,#EEF2FF 65%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:clipReveal 1s 1.55s var(--ease) forwards,sheen 6s 3s ease-in-out infinite}
+@keyframes sheen{0%,60%,100%{background-position:0% 0}30%{background-position:100% 0}}
+.hero-name .line:nth-child(2) span{animation-delay:1.7s;color:transparent;-webkit-text-stroke:1.5px var(--amber);
+  text-shadow:0 0 60px rgba(245,166,35,.25)}
+@keyframes clipReveal{to{transform:none}}
+.hero-bio{max-width:560px;margin-top:32px;font-size:17px;line-height:1.6;color:var(--text-muted);
+  opacity:0;transform:translateY(14px);animation:riseIn .7s 2s var(--ease) forwards}
+.hero-bio b{color:var(--text-primary);font-weight:500}
+.hero-ctas{display:flex;gap:16px;margin-top:44px;opacity:0;transform:translateY(14px);
+  animation:riseIn .7s 2.15s var(--ease) forwards}
+.btn{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+  padding:14px 28px;border-radius:999px;display:inline-flex;align-items:center;gap:10px;
+  transition:box-shadow .25s,border-color .25s,color .25s,background .25s;border:1px solid transparent;
+  position:relative;overflow:hidden;will-change:transform}
+.btn-primary{background:var(--amber);color:var(--bg-deep)}
+.btn-primary::after{content:'';position:absolute;top:0;left:-80%;width:50%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:skewX(-20deg);transition:left .55s ease}
+.btn-primary:hover::after{left:130%}
+.btn-primary:hover{box-shadow:0 8px 32px var(--amber-glow),0 0 0 1px var(--amber)}
+.btn-ghost{border-color:var(--border);color:var(--text-primary);background:rgba(10,15,30,.5)}
+.btn-ghost:hover{border-color:var(--star-blue);color:var(--star-blue)}
+.hero-scroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);
+  font-size:10px;letter-spacing:.3em;color:var(--text-muted);text-transform:uppercase;z-index:3;
+  opacity:0;animation:fadeIn 1s 3s forwards}
+.hero-scroll::after{content:'';display:block;width:1px;height:42px;margin:10px auto 0;
+  background:linear-gradient(var(--amber),transparent);animation:scrollPulse 2s infinite}
+@keyframes scrollPulse{0%,100%{opacity:.3}50%{opacity:1}}
+@media(max-width:760px){.hero{padding:0 24px}}
+
+/* ════════ MARQUEE ════════ */
+.marquee{border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  overflow:hidden;padding:18px 0;background:rgba(10,15,30,.35);position:relative}
+.marquee-track{display:flex;gap:0;width:max-content;animation:marq 30s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-track span{font-family:var(--font-mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--text-muted);white-space:nowrap;padding:0 28px;display:flex;align-items:center;gap:56px}
+.marquee-track span::after{content:'◆';color:var(--amber);font-size:8px}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* ════════ SECTION SHELL ════════ */
+section{position:relative;padding:150px 48px;max-width:1200px;margin:0 auto}
+@media(max-width:760px){section{padding:96px 24px}}
+section[data-num]::before{content:attr(data-num);position:absolute;top:70px;right:24px;z-index:-1;
+  font-family:var(--font-display);font-weight:800;font-size:clamp(140px,22vw,260px);line-height:1;
+  color:transparent;-webkit-text-stroke:1px rgba(238,242,255,.045);pointer-events:none;user-select:none}
+.sec-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);
+  display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.sec-eyebrow::before{content:'';width:36px;height:1px;background:var(--amber)}
+.sec-title{font-family:var(--font-display);font-weight:700;font-size:clamp(34px,5vw,56px);line-height:1.05;
+  letter-spacing:-.01em;margin-bottom:56px}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}
+
+/* ════════ RESEARCH & EXPERIENCE ════════ */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:900px){.res-grid{grid-template-columns:1fr}}
+.res-card{--mx:50%;--my:50%;background:var(--bg-surface);border:1px solid var(--border);border-radius:18px;padding:40px;
+  position:relative;overflow:hidden;transition:border-color .35s,transform .35s,box-shadow .35s;
+  display:flex;flex-direction:column}
+.res-card::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:radial-gradient(440px circle at var(--mx) var(--my),rgba(74,158,255,.10),transparent 65%)}
+.res-card:hover::before{opacity:1}
+.res-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:0;transition:opacity .4s}
+.res-card:hover{border-color:rgba(245,166,35,.45);transform:translateY(-4px);
+  box-shadow:0 18px 60px rgba(0,0,0,.5),0 0 50px var(--amber-glow)}
+.res-card:hover::after{opacity:1}
+.res-meta{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--star-blue);display:flex;justify-content:space-between;margin-bottom:22px;gap:12px;flex-wrap:wrap}
+.res-meta .where{color:var(--text-muted)}
+.res-name{font-family:var(--font-display);font-weight:700;font-size:27px;line-height:1.15;margin-bottom:16px}
+.res-desc{font-size:15px;line-height:1.65;color:var(--text-muted);flex:1}
+.res-desc b{color:var(--text-primary);font-weight:500}
+.res-metrics{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.chip{font-family:var(--font-mono);font-size:11px;padding:9px 16px;border-radius:999px;
+  border:1px solid var(--border);color:var(--text-muted)}
+.chip b{color:var(--amber);font-weight:500;margin-right:5px;font-variant-numeric:tabular-nums}
+
+/* ════════ PROJECTS — COVERFLOW ════════ */
+.projects-wrap{max-width:none;padding-left:0;padding-right:0;overflow:hidden}
+.projects-head{max-width:1200px;margin:0 auto;padding:0 48px}
+@media(max-width:760px){.projects-head{padding:0 24px}}
+.flow-scene{perspective:1600px;height:540px;position:relative;margin-top:8px;
+  display:flex;align-items:center;justify-content:center}
+.flow-floor{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);width:70%;height:120px;
+  background:radial-gradient(ellipse closest-side,rgba(245,166,35,.07),transparent);pointer-events:none}
+.flow{position:relative;width:360px;height:480px;transform-style:preserve-3d}
+.proj-card{position:absolute;inset:0;background:linear-gradient(165deg,#0C1226 0%,var(--bg-surface) 45%,#080D1A 100%);
+  border:1px solid var(--border);border-radius:20px;padding:34px;display:flex;flex-direction:column;
+  transition:transform .8s var(--ease),opacity .8s,border-color .5s,box-shadow .5s;
+  overflow:hidden;will-change:transform}
+.proj-card::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 30% -10%,rgba(74,158,255,.12),transparent 55%)}
+.proj-card.front{border-color:rgba(245,166,35,.55);box-shadow:0 30px 90px rgba(0,0,0,.65),0 0 70px var(--amber-glow)}
+.proj-card.front::after{content:'';position:absolute;top:-20%;left:-80%;width:45%;height:140%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.05),transparent);
+  transform:skewX(-18deg);animation:glare 4.5s ease-in-out infinite}
+@keyframes glare{0%,55%,100%{left:-80%}25%{left:140%}}
+.proj-card.front .proj-open{opacity:1;transform:none}
+.proj-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--star-blue);
+  display:inline-flex;width:fit-content;padding:6px 12px;border:1px solid rgba(74,158,255,.3);border-radius:999px;margin-bottom:20px}
+.proj-name{font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1.12;margin-bottom:14px}
+.proj-desc{font-size:14px;line-height:1.6;color:var(--text-muted);flex:1}
+.proj-desc b{color:var(--text-primary);font-weight:500}
+.proj-stack{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0;padding-top:18px;border-top:1px solid var(--border)}
+.proj-stack span{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:.06em}
+.proj-stack span::before{content:'·';color:var(--amber);margin-right:6px}
+.proj-open{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--amber);background:none;border:1px solid rgba(245,166,35,.4);border-radius:999px;
+  padding:12px 22px;width:fit-content;opacity:.5;transform:translateY(4px);
+  transition:opacity .4s,transform .4s,background .25s,color .25s}
+.proj-open:hover{background:var(--amber);color:var(--bg-deep)}
+.gh-card{align-items:center;justify-content:center;text-align:center;gap:18px}
+.gh-card .proj-name{font-size:30px}
+.flow-nav{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:44px}
+.car-btn{width:52px;height:52px;border-radius:50%;border:1px solid var(--border);background:var(--bg-surface);
+  color:var(--text-primary);font-size:18px;display:flex;align-items:center;justify-content:center;
+  transition:border-color .25s,color .25s,transform .25s}
+.car-btn:hover{border-color:var(--amber);color:var(--amber);transform:scale(1.08)}
+.car-dots{display:flex;gap:8px;align-items:center}
+.car-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background .3s,transform .3s}
+.car-dot.on{background:var(--amber);transform:scale(1.4)}
+@media(max-width:760px){.flow{width:300px;height:460px}.flow-scene{height:500px}}
+
+/* ════════ DETAIL PAGE ════════ */
+.detail{position:fixed;inset:0;z-index:200;background:var(--bg-deep);overflow-y:auto;
+  opacity:0;visibility:hidden;transform:translateY(30px);
+  transition:opacity .45s var(--ease),transform .45s var(--ease),visibility 0s .45s}
+.detail.open{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.detail-inner{max-width:920px;margin:0 auto;padding:120px 48px 120px}
+@media(max-width:760px){.detail-inner{padding:100px 24px 80px}}
+.detail-back{position:fixed;top:24px;left:48px;z-index:210;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);background:rgba(10,15,30,.8);
+  backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:999px;padding:12px 22px;
+  transition:color .25s,border-color .25s}
+.detail-back:hover{color:var(--amber);border-color:var(--amber)}
+@media(max-width:760px){.detail-back{left:24px}}
+.detail-tag{font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--star-blue)}
+.detail-title{font-family:var(--font-display);font-weight:700;font-size:clamp(38px,6vw,68px);line-height:1.02;
+  margin:18px 0 26px;letter-spacing:-.015em}
+.detail-stack{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:48px}
+.detail-stack span{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);
+  padding:8px 16px;border:1px solid var(--border);border-radius:999px}
+.detail-body h3{font-family:var(--font-display);font-weight:600;font-size:22px;margin:44px 0 14px;color:var(--text-primary)}
+.detail-body p{color:var(--text-muted);font-size:16px;line-height:1.75;margin-bottom:14px}
+.detail-body b{color:var(--text-primary);font-weight:500}
+.detail-body ul{list-style:none;padding:0;margin:14px 0;display:flex;flex-direction:column;gap:10px}
+.detail-body ul li{color:var(--text-muted);font-size:15px;line-height:1.65;padding-left:24px;position:relative}
+.detail-body ul li::before{content:'▸';position:absolute;left:0;top:0;color:var(--amber);font-size:13px;line-height:1.65}
+.dp-stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:24px 0 8px}
+.dp-stat{background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.dp-stat .v{font-family:var(--font-display);font-weight:800;font-size:26px;color:var(--amber);line-height:1;font-variant-numeric:tabular-nums}
+.dp-stat .l{font-family:var(--font-mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-top:6px}
+.dp-finding{background:linear-gradient(135deg,rgba(245,166,35,.07),rgba(74,158,255,.04));
+  border:1px solid rgba(245,166,35,.20);border-radius:14px;padding:22px 26px;margin:24px 0;position:relative}
+.dp-finding::before{content:'KEY FINDING';position:absolute;top:-9px;left:18px;background:var(--bg-deep);
+  padding:0 10px;font-family:var(--font-mono);font-size:9px;letter-spacing:.22em;color:var(--amber)}
+.dp-finding p{margin:0;color:var(--text-primary);font-size:15px;line-height:1.7}
+.dp-table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+.dp-table th,.dp-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border)}
+.dp-table th{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--star-blue);font-weight:500}
+.dp-table td{color:var(--text-muted)}
+.dp-table td b{color:var(--text-primary)}
+.dp-table tr:hover td{color:var(--text-primary)}
+.dp-pipeline{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);background:var(--bg-surface);
+  border:1px solid var(--border);border-radius:10px;padding:18px 22px;line-height:1.9;margin:14px 0;
+  white-space:pre;overflow-x:auto}
+.dp-pipeline em{color:var(--amber);font-style:normal}
+.dp-callout{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0}
+.dp-callout > div{background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.dp-callout h4{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+.dp-callout.bad h4{color:var(--star-blue)}
+.dp-callout ul{margin:0}
+@media(max-width:640px){.dp-callout{grid-template-columns:1fr}}
+.media-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:640px){.media-grid{grid-template-columns:1fr}}
+.media-slot{aspect-ratio:16/10;border:1px dashed var(--border);border-radius:14px;background:var(--bg-surface);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.12em;color:var(--text-muted);text-transform:uppercase;text-align:center;padding:20px}
+.media-item{position:relative;border:1px solid var(--border);border-radius:14px;overflow:hidden;
+  background:var(--bg-surface);transition:border-color .3s,transform .3s var(--ease)}
+.media-item:hover{border-color:rgba(245,166,35,.4);transform:translateY(-2px)}
+.media-item .frame{position:relative;aspect-ratio:16/10;background:#000;overflow:hidden}
+.media-item .frame iframe,.media-item .frame img,.media-item .frame video{
+  position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:cover}
+.media-item .frame.fit img,.media-item .frame.fit video{object-fit:contain;background:#06090F}
+.media-item .cap{padding:11px 16px;font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--text-muted);border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;gap:10px}
+.media-item .cap b{color:var(--amber);font-weight:500}
+.media-item .cap a{color:var(--star-blue);font-size:9px;letter-spacing:.18em}
+.media-item .cap a:hover{color:var(--amber)}
+.media-item.wide{grid-column:1/-1}
+.media-item.wide .frame{aspect-ratio:16/9}
+.detail-links{display:flex;gap:14px;margin-top:56px;flex-wrap:wrap}
+
+/* ════════ SKILLS ════════ */
+@property --ga{syntax:'<angle>';initial-value:0deg;inherits:false}
+.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.skills-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.skills-grid{grid-template-columns:1fr}}
+.skill-card{background:var(--bg-surface);border-radius:14px;padding:28px;position:relative;
+  transition:transform .3s;isolation:isolate}
+.skill-card::before{content:'';position:absolute;inset:0;border-radius:14px;padding:1px;z-index:-1;
+  background:conic-gradient(from var(--ga),#F5A623,#4A9EFF,#B44AFF,#FF4A8D,#F5A623);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:.35;transition:opacity .4s;animation:spinBorder 7s linear infinite}
+.skill-card::after{content:'';position:absolute;inset:-2px;border-radius:16px;z-index:-2;
+  background:conic-gradient(from var(--ga),#F5A623,#4A9EFF,#B44AFF,#FF4A8D,#F5A623);
+  filter:blur(18px);opacity:0;transition:opacity .4s;animation:spinBorder 7s linear infinite}
+@keyframes spinBorder{to{--ga:360deg}}
+.skill-card:hover{transform:translateY(-4px)}
+.skill-card:hover::before{opacity:1}
+.skill-card:hover::after{opacity:.28}
+.skill-cat{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:18px}
+.skill-list{display:flex;flex-wrap:wrap;gap:9px}
+.skill-list span{font-size:13px;color:var(--text-muted);padding:7px 14px;border:1px solid var(--border);
+  border-radius:999px;transition:color .25s,border-color .25s}
+.skill-list span:hover{color:var(--text-primary);border-color:var(--star-blue)}
+
+/* ════════ EDUCATION ════════ */
+.edu-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:18px;
+  padding:44px;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;
+  position:relative;overflow:hidden;transition:border-color .35s,box-shadow .35s;
+  transform-style:preserve-3d;will-change:transform}
+.edu-card::before{content:'';position:absolute;top:-60%;right:-20%;width:60%;height:160%;
+  background:radial-gradient(closest-side,rgba(74,158,255,.10),transparent);pointer-events:none}
+.edu-card:hover{border-color:rgba(74,158,255,.45);box-shadow:0 18px 60px rgba(0,0,0,.5)}
+@media(max-width:860px){.edu-card{grid-template-columns:1fr;gap:28px;padding:32px}}
+.edu-deg{font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1.2;margin:6px 0 8px}
+.edu-school{color:var(--text-muted);font-size:15px}
+.edu-row{display:flex;gap:28px;margin-top:24px;flex-wrap:wrap}
+.edu-stat .v{font-family:var(--font-display);font-weight:800;font-size:30px;color:var(--amber);font-variant-numeric:tabular-nums}
+.edu-stat .l{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-top:4px}
+.edu-course-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--star-blue);margin-bottom:14px}
+.edu-courses{display:flex;flex-wrap:wrap;gap:9px}
+.edu-courses span{font-size:13px;color:var(--text-muted);padding:7px 14px;border:1px solid var(--border);
+  border-radius:999px;transition:color .25s,border-color .25s}
+.edu-courses span:hover{color:var(--text-primary);border-color:var(--amber)}
+
+/* ════════ TIMELINE ════════ */
+.tl{position:relative;margin-left:8px}
+.tl::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:1px;background:var(--border)}
+.tl-line{position:absolute;left:0;top:6px;width:1px;height:0;z-index:1;
+  background:linear-gradient(var(--amber),var(--star-blue));
+  box-shadow:0 0 10px rgba(245,166,35,.4)}
+.tl-item{position:relative;padding:0 0 56px 44px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-5px;top:6px;width:11px;height:11px;border-radius:50%;
+  background:var(--bg-deep);border:2px solid var(--amber);box-shadow:0 0 14px var(--amber-glow);
+  transition:background .3s,box-shadow .3s;z-index:2}
+.tl-item:hover::before{background:var(--amber);box-shadow:0 0 22px rgba(245,166,35,.5)}
+.tl-date{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--star-blue)}
+.tl-role{font-family:var(--font-display);font-weight:700;font-size:22px;margin:8px 0 4px}
+.tl-org{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--text-muted);text-transform:uppercase}
+.tl-desc{color:var(--text-muted);font-size:15px;line-height:1.65;margin-top:12px;max-width:680px}
+.tl-desc b{color:var(--text-primary);font-weight:500}
+
+/* ════════ FOOTER ════════ */
+footer{border-top:1px solid var(--border);padding:110px 48px 60px;text-align:center;position:relative;overflow:hidden}
+footer::before{content:'';position:absolute;left:50%;bottom:-40vw;transform:translateX(-50%);
+  width:90vw;height:90vw;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(245,166,35,.07),transparent 70%)}
+.foot-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:24px}
+.foot-title{font-family:var(--font-display);font-weight:700;font-size:clamp(30px,4.4vw,52px);margin-bottom:40px;line-height:1.08}
+.mega-mail{display:inline-block;font-family:var(--font-display);font-weight:700;
+  font-size:clamp(22px,4.6vw,58px);letter-spacing:-.01em;line-height:1.2;
+  border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:56px;
+  transition:color .3s,border-color .3s;position:relative}
+.mega-mail .arr{display:inline-block;transition:transform .35s var(--ease);color:var(--amber)}
+.mega-mail:hover{color:var(--amber);border-color:var(--amber)}
+.mega-mail:hover .arr{transform:translate(10px,-6px)}
+.foot-links{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.copy-email{position:relative}
+.copy-email.copied::after{content:'COPIED ✓';position:absolute;top:-34px;left:50%;transform:translateX(-50%);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--amber);white-space:nowrap}
+.foot-bottom{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+  margin-top:90px;padding-top:28px;border-top:1px solid var(--border)}
+.foot-note{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase}
+.to-top{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-muted);transition:color .25s}
+.to-top:hover{color:var(--amber)}
+
+/* ════════ THEME TOGGLE ════════ */
+.theme-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);
+  background:transparent;color:var(--text-primary);font-size:15px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .25s,color .25s,transform .4s var(--ease)}
+.theme-btn:hover{border-color:var(--amber);color:var(--amber);transform:rotate(180deg)}
+html.theming *{transition:background-color .35s ease,color .35s ease,border-color .35s ease,box-shadow .35s ease!important}
+
+/* ════════ LIGHT MODE ════════ */
+html[data-theme="light"]{
+  --bg-deep:#E4E6EC;--bg-surface:#EEF0F4;--border:#C7CCD6;
+  --amber:#B57708;--star-blue:#1E4FB5;
+  --text-primary:#181C2A;--text-muted:#5C6478;
+  --amber-glow:rgba(181,119,8,.13);
+}
+html[data-theme="light"] body{color:var(--text-primary)}
+html[data-theme="light"] .hero-bg{background:
+  radial-gradient(ellipse 90% 70% at 50% 120%,rgba(30,79,181,.08),transparent 65%),
+  radial-gradient(ellipse 70% 50% at 85% 10%,rgba(30,79,181,.05),transparent 60%),
+  linear-gradient(180deg,#DFE2E9 0%,#E2E5EC 60%,#E4E6EC 100%)}
+html[data-theme="light"] .hero-grid{background-image:
+  linear-gradient(rgba(30,79,181,.05) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(30,79,181,.05) 1px,transparent 1px)}
+html[data-theme="light"] .hero-vignette{background:
+  radial-gradient(ellipse 120% 100% at 50% 50%,transparent 60%,rgba(200,205,215,.7) 100%)}
+html[data-theme="light"] .blob-a{background:rgba(30,79,181,.10)}
+html[data-theme="light"] .blob-b{background:rgba(181,119,8,.08)}
+html[data-theme="light"] nav{background:linear-gradient(to bottom,rgba(228,230,236,.85),transparent)}
+html[data-theme="light"] nav.scrolled{background:rgba(228,230,236,.88);border-bottom-color:var(--border)}
+html[data-theme="light"] .mobile-menu{background:rgba(228,230,236,.97)}
+html[data-theme="light"] .hero-status{background:rgba(238,240,244,.7);border-color:var(--border)}
+html[data-theme="light"] .btn-ghost{background:rgba(238,240,244,.7);border-color:var(--border)}
+html[data-theme="light"] .hero-name .line:first-child span{
+  background:linear-gradient(110deg,#181C2A 35%,#3A4868 48%,#1E4FB5 52%,#181C2A 65%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text}
+html[data-theme="light"] .hero-name .line:nth-child(2) span{text-shadow:0 0 40px rgba(181,119,8,.22)}
+html[data-theme="light"] .marquee{background:rgba(238,240,244,.55);border-color:var(--border)}
+html[data-theme="light"] section[data-num]::before{-webkit-text-stroke:1px rgba(24,28,42,.06)}
+html[data-theme="light"] .res-card,
+html[data-theme="light"] .skill-card,
+html[data-theme="light"] .edu-card,
+html[data-theme="light"] .proj-card{background:#EEF0F4;border-color:var(--border)}
+html[data-theme="light"] .proj-card{background:linear-gradient(165deg,#EEF0F4 0%,#E8EBF1 45%,#E4E6EC 100%)}
+html[data-theme="light"] .proj-card.front{box-shadow:0 18px 50px rgba(20,32,70,.14),0 0 40px rgba(181,119,8,.08)}
+html[data-theme="light"] .proj-card.front::after{background:linear-gradient(100deg,transparent,rgba(30,79,181,.04),transparent)}
+html[data-theme="light"] .res-card:hover{box-shadow:0 14px 40px rgba(20,32,70,.10),0 0 30px rgba(181,119,8,.07)}
+html[data-theme="light"] .edu-card:hover{box-shadow:0 14px 40px rgba(20,32,70,.10)}
+html[data-theme="light"] .grain{opacity:.025}
+html[data-theme="light"] .flow-floor{background:radial-gradient(ellipse closest-side,rgba(181,119,8,.07),transparent)}
+html[data-theme="light"] footer::before{background:radial-gradient(closest-side,rgba(181,119,8,.07),transparent 70%)}
+html[data-theme="light"] .scan-label{color:rgba(150,98,7,.7)}
+html[data-theme="light"] .detail{background:var(--bg-deep)}
+html[data-theme="light"] .detail-back{background:rgba(238,240,244,.85);border-color:var(--border)}
+html[data-theme="light"] .media-item,
+html[data-theme="light"] .media-slot{background:#EEF0F4;border-color:var(--border)}
+html[data-theme="light"] .dp-stat,
+html[data-theme="light"] .dp-pipeline,
+html[data-theme="light"] .dp-callout > div{background:#EEF0F4;border-color:var(--border)}
+html[data-theme="light"] .dp-finding{background:linear-gradient(135deg,rgba(181,119,8,.07),rgba(30,79,181,.04));border-color:rgba(181,119,8,.20)}
+html[data-theme="light"] ::-webkit-scrollbar-track{background:var(--bg-deep)}
+html[data-theme="light"] ::-webkit-scrollbar-thumb{border-color:var(--bg-deep)}
+html[data-theme="light"] .scanveil{background:#D8DBE3}
+
+/* ════════ MISC ════════ */
+body.detail-locked{overflow:hidden}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  #cloud,.grain{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="scanveil" id="sv"></div>
+<div class="scan-noise" id="sn"></div>
+<div class="scanline" id="sl"></div>
+<div class="scan-tag" id="st">SCANNING ENVIRONMENT</div>
+
+<div class="grain"></div>
+<div class="scroll-progress" id="sprog"></div>
+<div class="cursor-ring"></div>
+<div class="cursor-dot"></div>
+
+<nav id="nav">
+  <div class="nav-logo" id="logo">DD/037</div>
+  <div class="nav-links">
+    <a href="#research">Research</a>
+    <a href="#projects">Projects</a>
+    <a href="#skills">Skills</a>
+    <a href="#timeline">Timeline</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:18px">
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">◐</button>
+    <button class="nav-burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#research">Research</a><a href="#projects">Projects</a><a href="#skills">Skills</a><a href="#timeline">Timeline</a><a href="#contact">Contact</a>
+</div>
+
+<!-- ════════ HERO ════════ -->
+<header class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="plx" id="plxBlobs"><div class="blob blob-a"></div><div class="blob blob-b"></div></div>
+  <!-- Optional AI bg: place hero.jpg / hero.mp4 next to this file and uncomment:
+  <img class="hero-media" src="hero.jpg" alt="">
+  <video class="hero-media" src="hero.mp4" autoplay muted loop playsinline></video> -->
+  <div class="hero-grid" id="plxGrid"></div>
+  <canvas id="cloud"></canvas>
+  <div class="scan-label" id="scanLabel"></div>
+  <div class="hero-vignette"></div>
+  <div class="hero-content" id="plxContent">
+    <div class="hero-status"><i></i>Open to research internships — 2026</div>
+    <div class="hero-eyebrow"><span id="scramble">Robotics · Perception · Learning-Based Control</span></div>
+    <h1 class="hero-name">
+      <span class="line"><span>Dhyan</span></span>
+      <span class="line"><span>Dalwadi</span></span>
+    </h1>
+    <p class="hero-bio">
+      I build robots that <b>understand their world</b> — not just sense it.
+      Undergraduate researcher working on <b>perception-driven manipulation</b>,
+      task-aware grasping, and sim-to-real transfer.
+    </p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" data-mag href="https://drive.google.com/file/d/1zkoaF2J4SI9Ax5jWJWluXiSy5WXyauxP/view?usp=sharing" target="_blank" rel="noopener">Resume ↓</a>
+      <a class="btn btn-ghost" data-mag href="https://github.com/dyn-dal-037" target="_blank">GitHub ↗</a>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</header>
+
+<!-- ════════ MARQUEE ════════ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marq">
+    <span>Perception-Driven Manipulation</span><span>Task-Aware Grasping</span><span>Sim-to-Real Transfer</span><span>Learning-Based Control</span><span>Embodied Cognition</span><span>ROS 2</span><span>Deep RL</span>
+  </div>
+</div>
+
+<!-- ════════ RESEARCH & EXPERIENCE ════════ -->
+<section id="research" data-num="01">
+  <div class="sec-eyebrow reveal">01 — Research &amp; Experience</div>
+  <h2 class="sec-title reveal reveal-d1">Perception meets<br>cognition.</h2>
+  <div class="res-grid">
+    <div class="res-card reveal reveal-d1" data-spot>
+      <div class="res-meta"><span>Independent Research · Ongoing</span><span class="where">2025 — Present</span></div>
+      <h3 class="res-name">SemGrasp-Former</h3>
+      <p class="res-desc">
+        A <b>cross-modal transformer</b> for task-conditioned 6-DoF grasp quality prediction,
+        fusing RGB-D inputs with natural-language task descriptions — benchmarked against a
+        FiLM-conditioned ResNet-50 baseline. A <b>physics-informed (PI-NN) augmented head</b>
+        lifts performance on a custom affordance-annotated Gazebo benchmark with 6-DoF poses,
+        task-success annotations, and physical constraint features.
+      </p>
+      <div class="res-metrics">
+        <span class="chip"><b data-cnt="0.935" data-dec="3">0.000</b>Spearman ρ</span>
+        <span class="chip"><b data-cnt="0.913" data-dec="3">0.000</b>AUROC</span>
+        <span class="chip"><b data-cnt="85.8" data-dec="1" data-suf="%">0.0%</b>Acc (+3.1%)</span>
+      </div>
+    </div>
+    <div class="res-card reveal reveal-d2" data-spot>
+      <div class="res-meta"><span>Research Intern · IIT-BHU Varanasi</span><span class="where">May — Jun 2025</span></div>
+      <h3 class="res-name">Adaptive Foot Design for Humanoids</h3>
+      <p class="res-desc">
+        Built a <b>hardware-in-the-loop prototype</b> fusing pressure-sensor and IMU streams for
+        real-time <b>Zero Moment Point estimation</b> and foot–ground stability visualization on a
+        humanoid. Designed a Gazebo contact-dynamics validation framework bridging the
+        <b>sim-to-real gap</b>, and a PPO/SAC reinforcement learning framework for closed-loop
+        gait stability trained in simulation.
+      </p>
+      <div class="res-metrics">
+        <span class="chip"><b>ZMP</b>Real-time</span>
+        <span class="chip"><b>Sensor</b>Fusion</span>
+        <span class="chip"><b>PPO/SAC</b>Gait RL</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ PROJECTS ════════ -->
+<section id="projects" class="projects-wrap" data-num="02">
+  <div class="projects-head">
+    <div class="sec-eyebrow reveal">02 — Projects</div>
+    <h2 class="sec-title reveal reveal-d1">Built to work.<br>Not just to demo.</h2>
+  </div>
+  <div class="flow-scene reveal reveal-d2">
+    <div class="flow-floor"></div>
+    <div class="flow" id="flow"></div>
+  </div>
+  <div class="flow-nav">
+    <button class="car-btn" id="prevBtn" aria-label="Previous project">←</button>
+    <div class="car-dots" id="dots"></div>
+    <button class="car-btn" id="nextBtn" aria-label="Next project">→</button>
+  </div>
+</section>
+
+<!-- ════════ SKILLS ════════ -->
+<section id="skills" data-num="03">
+  <div class="sec-eyebrow reveal">03 — Skills</div>
+  <h2 class="sec-title reveal reveal-d1">The toolkit.</h2>
+  <div class="skills-grid">
+    <div class="skill-card reveal"><div class="skill-cat">Robotics</div>
+      <div class="skill-list"><span>ROS 2 Humble/Jazzy</span><span>Gazebo</span><span>MuJoCo</span><span>Kinematics &amp; Dynamics</span><span>Sensor Integration</span></div></div>
+    <div class="skill-card reveal reveal-d1"><div class="skill-cat">AI / ML</div>
+      <div class="skill-list"><span>Transformers</span><span>Reinforcement Learning</span><span>CNNs</span><span>PyTorch</span><span>TensorFlow</span></div></div>
+    <div class="skill-card reveal reveal-d2"><div class="skill-cat">Computer Vision</div>
+      <div class="skill-list"><span>OpenCV</span><span>Pose Estimation</span><span>Segmentation</span><span>3D Geometry</span><span>Mediapipe</span></div></div>
+    <div class="skill-card reveal"><div class="skill-cat">Programming</div>
+      <div class="skill-list"><span>Python</span><span>C++</span><span>MATLAB</span><span>NumPy</span></div></div>
+    <div class="skill-card reveal reveal-d1"><div class="skill-cat">Hardware</div>
+      <div class="skill-list"><span>ESP32</span><span>Raspberry Pi</span><span>Arduino</span><span>Manipulators</span><span>Sensors</span></div></div>
+    <div class="skill-card reveal reveal-d2"><div class="skill-cat">Tools</div>
+      <div class="skill-list"><span>Linux</span><span>Git / GitHub</span><span>SB3</span><span>RViz2</span></div></div>
+  </div>
+</section>
+
+<!-- ════════ EDUCATION ════════ -->
+<section id="education" data-num="04">
+  <div class="sec-eyebrow reveal">04 — Education</div>
+  <h2 class="sec-title reveal reveal-d1">The foundation.</h2>
+  <div class="edu-card reveal reveal-d2" data-tilt>
+    <div>
+      <div class="tl-org">Indian Institute of Information Technology</div>
+      <div class="edu-deg">B.Tech — Electronics &amp; Communication Engineering</div>
+      <div class="edu-school">IIIT Bhopal, India</div>
+      <div class="edu-row">
+        <div class="edu-stat"><div class="v"><span data-cnt="8.41" data-dec="2">0.00</span></div><div class="l">CGPA / 10</div></div>
+        <div class="edu-stat"><div class="v">2027</div><div class="l">Expected May</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="edu-course-label">Relevant Coursework</div>
+      <div class="edu-courses">
+        <span>Artificial Neural Networks</span><span>Control Systems</span><span>Linear Algebra</span>
+        <span>Data Structures &amp; Algorithms</span><span>Probability &amp; Stochastic Processes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TIMELINE ════════ -->
+<section id="timeline" data-num="05">
+  <div class="sec-eyebrow reveal">05 — Timeline</div>
+  <h2 class="sec-title reveal reveal-d1">The trajectory.</h2>
+  <div class="tl" id="tl">
+    <div class="tl-line" id="tlLine"></div>
+    <div class="tl-item reveal">
+      <div class="tl-date">Nov 2025 — Present</div>
+      <div class="tl-role">Robotics Lead</div>
+      <div class="tl-org">Spark — Robotics Club, IIIT Bhopal</div>
+      <p class="tl-desc">Leading a 5-person technical team and 20-person management team. Designed, built, and deployed <b>22 custom combat-soccer robots</b> for RoboSoccer × RoboWar — a 4-day event with <b>1,000+ footfall and 450+ participants</b>; ran workshops on bot design and motor control.</p>
+    </div>
+    <div class="tl-item reveal reveal-d1">
+      <div class="tl-date">May — Jun 2025</div>
+      <div class="tl-role">Research Intern</div>
+      <div class="tl-org">IIT (BHU), Varanasi</div>
+      <p class="tl-desc">Adaptive foot design for humanoid robots — <b>hardware-in-the-loop ZMP estimation</b> via pressure-sensor + IMU fusion, Gazebo contact-dynamics validation, and a PPO/SAC framework for closed-loop gait stability.</p>
+    </div>
+    <div class="tl-item reveal reveal-d2">
+      <div class="tl-date">2024 — 2025</div>
+      <div class="tl-role">Social Media Head</div>
+      <div class="tl-org">IEEE Student Chapter</div>
+      <p class="tl-desc">Grew social reach by <b>500%+</b>, doubled the chapter's following, and boosted Instagram views <b>10×</b>.</p>
+    </div>
+    <div class="tl-item reveal reveal-d3">
+      <div class="tl-date">2024</div>
+      <div class="tl-role">Runner-Up — Internal Hackathon</div>
+      <div class="tl-org">IIIT Bhopal</div>
+      <p class="tl-desc">Autonomous drone simulation for precision agriculture — <b>XGBoost yield prediction</b> from multispectral data and a CNN for targeted pesticide localization.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ CONTACT ════════ -->
+<footer id="contact">
+  <div class="foot-eyebrow">06 — Contact</div>
+  <h2 class="foot-title">Let's build something<br>that works.</h2>
+  <a class="mega-mail" href="mailto:dhyanmnd037@gmail.com">dhyanmnd037@gmail.com <span class="arr">↗</span></a>
+  <div class="foot-links">
+    <button class="btn btn-ghost copy-email" data-mag id="copyEmail">Copy Email</button>
+    <a class="btn btn-ghost" data-mag href="https://www.linkedin.com/in/dhyan-dalwadi-a44a64298/" target="_blank">LinkedIn ↗</a>
+    <a class="btn btn-ghost" data-mag href="https://github.com/dyn-dal-037" target="_blank">GitHub ↗</a>
+  </div>
+  <div class="foot-bottom">
+    <div class="foot-note">© 2026 Dhyan Dalwadi · IIIT Bhopal · ECE '27</div>
+    <a class="to-top" href="#top">Back to top ↑</a>
+  </div>
+</footer>
+
+<!-- ════════ PROJECT DETAIL OVERLAY ════════ -->
+<div class="detail" id="detail">
+  <button class="detail-back" id="detailBack">← Back to projects</button>
+  <div class="detail-inner" id="detailInner"></div>
+</div>
+
+<script>
+/* ════════ SCANLINE REVEAL ════════ */
+{
+  const sv=document.getElementById('sv'),sl=document.getElementById('sl'),
+        st=document.getElementById('st'),sn=document.getElementById('sn');
+  /* a couple of millis to ensure layout is committed, then trigger */
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    sv.classList.add('go');sl.classList.add('go');st.classList.add('go');sn.classList.add('go');
+    /* a few mid-sweep text flickers */
+    const labels=['SCANNING ENVIRONMENT','LOADING MANIFEST','PERCEPTION ONLINE','READY'];
+    let i=0;const id=setInterval(()=>{i++;if(i<labels.length)st.textContent=labels[i];},220);
+    setTimeout(()=>{
+      clearInterval(id);
+      sv.remove();sl.remove();st.remove();sn.remove();
+      document.body.classList.add('loaded');
+    },980);
+  }));
+}
+
+/* ════════ PROJECT DATA ════════ */
+const PROJECTS=[
+{id:'semgrasp',tag:'Ongoing Research · 2025–Present',name:'SemGrasp-Former',
+ stack:['PyTorch','CLIP ViT-B/16','Gazebo Fortress','MoveIt2','ROS 2 Humble','trimesh','PI-NN'],
+ card:'Cross-modal transformer for <b>task-conditioned 6-DoF grasp quality prediction</b>, fusing RGB-D inputs with natural-language task descriptions. ρ 0.935 · AUROC 0.913 · 85.8% accuracy.',
+ body:[
+  ['Overview',`<p>SemGrasp-Former predicts whether a robot can grasp an object in a <b>task-relevant</b> way — not just physically stable, but semantically appropriate. The same mug requires different grasps for <em>"pour from"</em> versus <em>"hand over"</em>. Given an RGB-D scene and a natural-language task descriptor, the system outputs a grasp quality score and a ranked set of 6-DoF grasp candidates.</p>
+  <p>The project spans two publication tracks: a <b>FiLM-ResNet50 baseline</b> targeting IEEE RA-L, and a <b>full transformer architecture</b> targeting ICRA/CoRL.</p>`],
+  ['The Problem',`<p>Standard grasp quality estimators are task-agnostic — they optimise for geometric stability without considering how the object will be used. A grasp suitable for transferring a cup is often physically identical to one that is semantically wrong for pouring from it. SemGrasp-Former introduces a language conditioning pathway to resolve this ambiguity, enabling <b>context-aware grasp selection without post-hoc re-ranking heuristics</b>.</p>`],
+  ['Architecture · Track A (Baseline)',`<ul>
+    <li><b>Backbone:</b> ResNet-50 visual encoder over concatenated RGB-D (4-channel input, 224×224)</li>
+    <li><b>Language conditioning:</b> FiLM layers injected at residual blocks 2–4; task embeddings from a frozen BERT tokenizer</li>
+    <li><b>Output heads:</b> binary grasp quality classifier + continuous quality regressor + separate physics-informed head predicting contact normal alignment and torque stability</li>
+    <li><b>Dataset:</b> 10,750-sample synthetic dataset across 5 YCB objects, 2 task categories</li>
+  </ul>`],
+  ['Architecture · Track B (Full SemGrasp-Former)',`<ul>
+    <li><b>Vision encoder:</b> CLIP ViT-B/16 (frozen), producing 768-dim patch tokens</li>
+    <li><b>Language encoder:</b> CLIP text encoder; task and object embeddings concatenated before FiLM injection — resolves shared-embedding collision for visually ambiguous classes (e.g., glass objects)</li>
+    <li><b>Cross-attention:</b> bidirectional cross-modal attention blocks — visual tokens attend to language context and vice versa</li>
+    <li><b>Grasp representation:</b> SE(3) pose + antipodal quality score; 200 candidates per object via trimesh-based antipodal sampler</li>
+  </ul>`],
+  ['Hardware Evaluation',`<p>Sim-to-real strategy: domain randomisation during Gazebo data collection (lighting, object pose perturbation, surface textures), then deployment on a 4-DoF platform.</p>
+  <ul>
+    <li><b>Platform:</b> Elephant Robotics myPalletizer 260 M5Stack (4-DoF), controlled via <code>pymycobot</code></li>
+    <li><b>Depth at inference:</b> Depth Anything V2 on monocular Kinect RGB (no dedicated depth sensor on hardware platform)</li>
+    <li><b>Target eval:</b> 500 real grasp attempts across 5 YCB objects, 2 task conditions</li>
+  </ul>`],
+  ['Key Results · Track A',`<div class="dp-stat-row">
+    <div class="dp-stat"><div class="v">0.935</div><div class="l">Spearman ρ</div></div>
+    <div class="dp-stat"><div class="v">0.913</div><div class="l">AUROC</div></div>
+    <div class="dp-stat"><div class="v">85.8%</div><div class="l">Accuracy</div></div>
+    <div class="dp-stat"><div class="v">+3.1%</div><div class="l">vs. baseline</div></div>
+  </div>
+  <p style="margin-top:14px"><em>Full SemGrasp-Former (Track B) results pending dataset completion and model training — Week 6 of 14-week plan.</em></p>`],
+  ['Status',`<p><b>Active development.</b> Track A dataset generation is in progress (Gazebo pipeline); the baseline model is trained and evaluated on synthetic data. Hardware evaluation is scheduled post-dataset completion.</p>`]
+ ],
+ links:[['GitHub ↗','https://github.com/dyn-dal-037'],['Watch Demo ↗','https://drive.google.com/file/d/1rX_oFyN4cSSZavaDszhT1D8pRj7VPbZl/view?usp=sharing']],
+ mediaItems:[
+   {type:'iframe',src:'https://drive.google.com/file/d/1rX_oFyN4cSSZavaDszhT1D8pRj7VPbZl/preview',cap:'System Demo',meta:'Video',wide:true,link:['Open in Drive ↗','https://drive.google.com/file/d/1rX_oFyN4cSSZavaDszhT1D8pRj7VPbZl/view?usp=sharing']}
+ ],media:0},
+
+{id:'leap',tag:'Deep RL · Dexterous Manipulation',name:'LEAP Hand Dexterous Grasping',
+ stack:['MuJoCo 3.x','PPO / SB3','ROS 2 Humble','Gymnasium','RViz2'],
+ card:'16-DOF LEAP Hand in MuJoCo, PPO over <b>2M steps</b> across three reward curricula. Diagnosed an <b>800k-step contact collapse</b> and built a ROS 2 deployment pipeline at 20 Hz.',
+ body:[
+  ['Overview',`<p>Learning-based dexterous grasping pipeline for the <b>LEAP Hand (16-DOF)</b> using PPO in MuJoCo. The policy learns to establish stable multi-finger contact with a target object and lift it above a success threshold. A ROS 2 deployment pipeline bridges the trained policy to real-time joint visualization in RViz2.</p>
+  <p>Built as the technical evaluation task for <b>RRC IIIT-H</b>.</p>`],
+  ['Environment Design',`<p><b>Observation space (42-dim):</b> 16 joint positions + 16 joint velocities + 3 object position + 4 object quaternion + 3 palm-to-object vector.</p>
+  <p><b>Action space (16-dim):</b> continuous PD position targets for all 16 joints, clipped to <code>[-1, 1]</code> and rescaled to joint limits. Sim runs at <b>200 Hz</b>; policy queries at <b>20 Hz</b> (10 sim steps per policy step).</p>
+  <p><b>Reward:</b></p>
+  <div class="dp-pipeline">r(t) = <em>0.30·r_approach</em> + <em>0.30·r_contact</em> + <em>0.50·r_lift</em> − 0.01·‖a‖²</div>
+  <p>Episode terminates on object drop, 500-step timeout, or <code>lift_height &gt; 0.15m</code> (success).</p>`],
+  ['PPO Hyperparameters',`<table class="dp-table">
+    <tr><th>Parameter</th><th>Value</th><th>Parameter</th><th>Value</th></tr>
+    <tr><td>learning_rate</td><td><b>3e-4</b></td><td>clip_range</td><td><b>0.2</b></td></tr>
+    <tr><td>n_steps</td><td><b>2048</b></td><td>ent_coef</td><td><b>0.01</b></td></tr>
+    <tr><td>batch_size</td><td><b>64</b></td><td>n_envs</td><td><b>8</b> (SubprocVecEnv)</td></tr>
+    <tr><td>gamma / gae_lambda</td><td><b>0.99 / 0.95</b></td><td>total_timesteps</td><td><b>2,000,000</b></td></tr>
+    <tr><td>policy</td><td colspan="3"><b>MlpPolicy 256×256</b></td></tr>
+  </table>`],
+  ['The Contact-Collapse Story',`<div class="dp-finding"><p>At ~800k steps, mean contacts dropped from <b>2.5 → 0.08</b>. The policy had discovered it could push the object upward with the palm edge — earning lift reward without a stable grasp. The degenerate solution then locked in for the remaining 1.2M steps.</p></div>
+  <p>A checkpoint sweep at 200k intervals isolates the phase transition:</p>
+  <table class="dp-table">
+    <tr><th>Checkpoint</th><th>Mean Lift</th><th>Mean Contacts</th><th>Behaviour</th></tr>
+    <tr><td>200k</td><td>4.2 mm</td><td>2.00</td><td>Palm approaching, contacts forming</td></tr>
+    <tr><td>600k</td><td>12.3 mm</td><td>1.57</td><td>Lift emerging, contacts still active</td></tr>
+    <tr><td><b>800k</b></td><td><b>17.3 mm</b></td><td><b>0.08</b></td><td><b>Contact collapse — degeneracy onset</b></td></tr>
+    <tr><td>1200k</td><td>19.4 mm</td><td>0.05</td><td>Pure pushing, no grasp</td></tr>
+    <tr><td>1800k</td><td>44.6 mm</td><td>0.04</td><td>Best lift — but not grasping</td></tr>
+  </table>
+  <p>The 200k–600k window showed genuine grasping. After 800k the reward signal incentivized nudging over closure.</p>`],
+  ['Reward Ablation (R1 / R2 / R3)',`<p>Post-hoc scoring of the R3-trained checkpoint under each reward configuration to isolate how the scoring signal interacts with the learned behaviour.</p>
+  <table class="dp-table">
+    <tr><th>Mode</th><th>Mean Lift</th><th>Mean Contacts</th><th>Note</th></tr>
+    <tr><td><b>R1</b> · Baseline</td><td>0.063 m</td><td>0.3</td><td>Most stable training</td></tr>
+    <tr><td><b>R2</b> · Fingertip</td><td>0.082 m</td><td><b>0.7</b></td><td>+133% finger contacts vs R1</td></tr>
+    <tr><td><b>R3</b> · Curriculum</td><td><b>0.086 m</b></td><td>0.3</td><td>Highest lift but volatile gate</td></tr>
+  </table>`],
+  ['What Worked / What Didn\'t',`<div class="dp-callout">
+    <div><h4>✓ Worked</h4><ul>
+      <li>Approach reward reliably drove the palm toward the object within 100k steps across all reward modes</li>
+      <li>R2 fingertip distance is a better approach signal than palm centroid for finger spreading</li>
+      <li>Modular <code>RewardConfig</code> dataclass made swapping reward modes trivial</li>
+    </ul></div>
+    <div><h4>✗ Struggled</h4><ul>
+      <li>R3 hard ≥3 contact gate too strict — zero lift signal until contacts are already reliable</li>
+      <li>Policy degeneration post-800k: object-nudging shortcut locked in for 1.2M steps</li>
+      <li>VecNormalize stats corrupted by mid-training hyperparameter change → forced raw-obs eval</li>
+    </ul></div>
+  </div>
+  <p><b>Would do differently:</b> soften the R3 gate to ≥2 contacts or anneal 1→3 over training; add fingertip XYZ to the observation space; use an asymmetric actor-critic so the critic sees privileged contact-force state the actor doesn't.</p>`],
+  ['ROS 2 Deployment Pipeline',`<p>Task B bridges the trained policy to RViz2 visualization via two ROS 2 nodes.</p>
+  <div class="dp-pipeline">policy_node.py  ──/hand/joint_commands──▶  interface_node.py  ──/joint_states──▶  RViz2
+  <em>SB3 inference</em>            <em>Float64MultiArray</em>           <em>JointState</em></div>
+  <p>Inference at <b>20 Hz</b>; <code>use_policy:=false</code> falls back to a sine-wave generator to test the ROS pipeline end-to-end independently of the trained model.</p>`]
+ ],
+ links:[['GitHub ↗','https://github.com/dyn-dal-037/leap_grasp_rl']],
+ mediaItems:[
+   {type:'video',src:'https://github.com/dyn-dal-037/leap_grasp_rl/raw/main/assets/grasp_demo.mp4',cap:'Grasp Rollout',meta:'Video',wide:true,link:['Source ↗','https://github.com/dyn-dal-037/leap_grasp_rl/blob/main/assets/grasp_demo.mp4']},
+   {type:'image',src:'https://raw.githubusercontent.com/dyn-dal-037/leap_grasp_rl/main/assets/learning_curve.png',cap:'Learning Curve',meta:'2M steps · PPO',fit:true,link:['Source ↗','https://github.com/dyn-dal-037/leap_grasp_rl/blob/main/assets/learning_curve.png']},
+   {type:'image',src:'https://raw.githubusercontent.com/dyn-dal-037/leap_grasp_rl/main/assets/ablation_curve.png',cap:'Reward Ablation',meta:'R1 / R2 / R3',fit:true,link:['Source ↗','https://github.com/dyn-dal-037/leap_grasp_rl/blob/main/assets/ablation_curve.png']},
+   {type:'image',src:'https://raw.githubusercontent.com/dyn-dal-037/leap_grasp_rl/main/assets/grasp_demo.gif',cap:'Grasp Demo (GIF)',meta:'Quick loop',link:['Source ↗','https://github.com/dyn-dal-037/leap_grasp_rl/blob/main/assets/grasp_demo.gif']}
+ ],media:0},
+
+{id:'franka',tag:'Perception · ROS 2 Manipulation',name:'Franka Panda Color Sorting',
+ stack:['ROS 2 Humble','Gazebo','MoveIt 2','OpenCV','pymoveit2','Python'],
+ card:'Autonomous 7-DOF <b>Franka Emika Panda</b> sorting Red/Green/Blue objects into bins via OpenCV color thresholding and a MoveIt 2 pick-and-place state machine in Gazebo.',
+ body:[
+  ['Overview',`<p>An autonomous manipulation project that identifies, picks, and sorts objects by color. The framework integrates the <b>Franka Emika Panda 7-DOF arm</b> with <b>MoveIt 2</b> for motion planning and <b>OpenCV</b> for visual perception inside a custom Gazebo simulation world.</p>`],
+  ['Modular ROS 2 Architecture',`<p>The project is built as 6 decoupled ROS 2 packages, each responsible for a single concern:</p>
+  <ul>
+    <li><code>panda_bringup</code> — launch files that start the simulation, MoveIt 2, and the controller simultaneously</li>
+    <li><code>panda_controller</code> — sorting state machine: <em>Pick → Move → Sort → Place</em></li>
+    <li><code>panda_vision</code> — vision node subscribing to the camera feed, publishing object coordinates</li>
+    <li><code>panda_description</code> — URDF, meshes, and the custom Gazebo world (conveyor, bins, colored debris)</li>
+    <li><code>panda_moveit</code> — MoveIt 2 configuration (SRDF, kinematics, joint limits)</li>
+    <li><code>pymoveit2</code> — helper library wrapping MoveIt 2 Python API calls</li>
+  </ul>`],
+  ['Perception Pipeline',`<ul>
+    <li>Real-time HSV color thresholding for Red / Green / Blue object segmentation</li>
+    <li>Centroid detection on segmented masks → object world-frame coordinates</li>
+    <li>Coordinates published to the controller node, which triggers a MoveIt 2 plan to the picked object</li>
+  </ul>`],
+  ['Manipulation Logic',`<p>Dynamic pick-and-place using the <code>pymoveit2</code> wrapper for precise end-effector control. The controller maintains a finite state machine cycling through Pick → Move → Sort → Place, with each color routed to a dedicated bin pose.</p>`],
+  ['Tooling',`<table class="dp-table">
+    <tr><th>Component</th><th>Stack</th></tr>
+    <tr><td>OS</td><td><b>Ubuntu 22.04 LTS</b> (Jammy Jellyfish)</td></tr>
+    <tr><td>ROS Distro</td><td><b>ROS 2 Humble Hawksbill</b></td></tr>
+    <tr><td>Planning</td><td>MoveIt 2 · pymoveit2</td></tr>
+    <tr><td>Perception</td><td>OpenCV · cv_bridge</td></tr>
+    <tr><td>Simulation</td><td>Gazebo (custom world)</td></tr>
+  </table>`]
+ ],
+ links:[['GitHub ↗','https://github.com/dyn-dal-037/7DOF-Color-Sorting-Manipulator-Franka-Panda'],['Watch Demo ↗','https://drive.google.com/file/d/1wnLG8Uj7DiyYlst-9Ar6ZQBTWtaybbRM/view?usp=sharing']],
+ mediaItems:[
+   {type:'iframe',src:'https://drive.google.com/file/d/1wnLG8Uj7DiyYlst-9Ar6ZQBTWtaybbRM/preview',cap:'Sorting Pipeline Demo',meta:'Gazebo + MoveIt 2',wide:true,link:['Open in Drive ↗','https://drive.google.com/file/d/1wnLG8Uj7DiyYlst-9Ar6ZQBTWtaybbRM/view?usp=sharing']}
+ ],media:0},
+
+{id:'retarget',tag:'Embedded · Teleoperation · Vision',name:'Human Motion Retargeting',
+ stack:['Kinect Xbox 360','ESP32','Python','WiFi / HTTP','Serial Bus Servos'],
+ card:'End-to-end <b>perception → representation → retargeting → embedded control</b> pipeline mapping Kinect-tracked human arm motion onto a 3-DOF robotic manipulator via WiFi.',
+ body:[
+  ['Overview',`<p>A vision-based human arm motion retargeting system that maps motion captured by a <b>Kinect Xbox 360</b> onto a physical 3-DOF robotic manipulator controlled by an <b>ESP32 over WiFi</b>. Demonstrates a complete perception → representation → retargeting → embedded control pipeline on real hardware.</p>`],
+  ['System Pipeline',`<div class="dp-pipeline">Human arm
+   ↓
+Kinect Xbox 360   <em>(skeletal tracking)</em>
+   ↓
+Joint angle computation   <em>(Python · shoulder / elbow / wrist)</em>
+   ↓
+CSV trajectory representation
+   ↓
+Motion retargeting + smoothing
+   ↓
+WiFi transmission   <em>(HTTP POST /sendData)</em>
+   ↓
+ESP32 WebServer
+   ↓
+Serial bus servos   <em>(3-DOF manipulator)</em></div>`],
+  ['Hardware Setup',`<ul>
+    <li><b>Kinect Xbox 360</b> for skeletal tracking + Windows PC for capture and retargeting</li>
+    <li><b>ESP32</b> running a WiFi web server with <code>POST /sendData</code> endpoint, payload format <code>angle1,angle2,angle3</code></li>
+    <li><b>Waveshare General Motor Driver</b> for Robots, with 3 high-torque serial bus servos</li>
+    <li>Joint mapping: Servo 1 → Shoulder · Servo 2 → Elbow · Servo 3 → Wrist (proxy angle)</li>
+  </ul>`],
+  ['Safety &amp; Constraints',`<p>Servo limits and rate constraints are enforced at <b>both the Python and ESP32 layers</b> — defense in depth against capture-side glitches that could otherwise drive the arm into self-collision or over-velocity states.</p>`],
+  ['Why It Matters',`<p>Retargeting is the bridge between human demonstration and robot capability — the same mapping problem that underlies modern imitation-learning data collection. The architecture here is deliberately modular: the Kinect block can be swapped for any other skeletal tracker, and the ESP32 block can be swapped for ROS-driven manipulators without touching the retargeting layer.</p>`],
+  ['Limitations &amp; Future Work',`<ul>
+    <li>Wrist angle is approximated due to Kinect skeletal-tracking constraints (no dedicated wrist landmark)</li>
+    <li>Current pipeline replays CSV-recorded trajectories rather than streaming live</li>
+    <li>Planned: live Kinect-to-robot streaming · ROS 2 integration · learning-based retargeting and imitation learning</li>
+  </ul>`]
+ ],
+ links:[['GitHub ↗','https://github.com/dyn-dal-037'],['Demo Videos ↗','https://drive.google.com/drive/folders/1rJb3mp3yVHOqHLJPWuf4lFBBddkgHWPv?usp=sharing']],
+ mediaItems:[
+   {type:'iframe',src:'https://drive.google.com/embeddedfolderview?id=1rJb3mp3yVHOqHLJPWuf4lFBBddkgHWPv#list',cap:'Demo Folder · Browse + Play',meta:'Google Drive',wide:true,link:['Open Folder ↗','https://drive.google.com/drive/folders/1rJb3mp3yVHOqHLJPWuf4lFBBddkgHWPv?usp=sharing']}
+ ],media:0},
+
+{id:'github',tag:'More on GitHub',name:'dyn-dal-037',gh:true,
+ stack:['Emotion Recognition','Hand Motion Completion','Edge-Avoidance ROS Bot','+ more'],
+ card:'The full archive — experiments, course projects, and everything in between.',
+ links:[['Open GitHub ↗','https://github.com/dyn-dal-037?tab=repositories']],media:0}
+];
+
+/* ════════ BUILD CARDS ════════ */
+const flow=document.getElementById('flow');
+PROJECTS.forEach(p=>{
+  const el=document.createElement('div');
+  el.className='proj-card'+(p.gh?' gh-card':'');
+  el.innerHTML=p.gh
+   ? `<span class="proj-tag">${p.tag}</span><h3 class="proj-name">${p.name}</h3>
+      <p class="proj-desc">${p.card}</p>
+      <div class="proj-stack" style="justify-content:center">${p.stack.map(s=>`<span>${s}</span>`).join('')}</div>
+      <a class="btn btn-primary" href="${p.links[0][1]}" target="_blank">${p.links[0][0]}</a>`
+   : `<span class="proj-tag">${p.tag}</span><h3 class="proj-name">${p.name}</h3>
+      <p class="proj-desc">${p.card}</p>
+      <div class="proj-stack">${p.stack.map(s=>`<span>${s}</span>`).join('')}</div>
+      <button class="proj-open" data-id="${p.id}">View Project →</button>`;
+  flow.appendChild(el);
+});
+const cards=[...flow.children];
+const N=cards.length;
+let cur=0;
+
+/* ════════ COVERFLOW ════════ */
+const dotsEl=document.getElementById('dots');
+cards.forEach(()=>{const d=document.createElement('div');d.className='car-dot';dotsEl.appendChild(d);});
+const cdots=[...dotsEl.children];
+function layout(){
+  const isMobile=innerWidth<760;
+  const SPACING=isMobile?230:300,ANGLE=28,DEPTH=170;
+  cards.forEach((c,i)=>{
+    let d=i-cur;
+    if(d>N/2)d-=N;if(d<-N/2)d+=N;
+    const ad=Math.abs(d);
+    c.style.transform=`translateX(${d*SPACING}px) rotateY(${-d*ANGLE}deg) translateZ(${-ad*DEPTH}px) scale(${1-ad*.06})`;
+    c.style.opacity=ad>2?0:(1-ad*.28);
+    c.style.zIndex=String(100-ad*10);
+    c.style.pointerEvents=d===0?'auto':'none';
+    c.classList.toggle('front',d===0);
+  });
+  cdots.forEach((dt,i)=>dt.classList.toggle('on',i===((cur%N)+N)%N));
+}
+function go(n){cur=((n%N)+N)%N;layout();}
+document.getElementById('nextBtn').onclick=()=>go(cur+1);
+document.getElementById('prevBtn').onclick=()=>go(cur-1);
+addEventListener('keydown',e=>{
+  if(detail.classList.contains('open'))return;
+  if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+addEventListener('resize',layout);
+let dragX=null;
+const scene=document.querySelector('.flow-scene');
+scene.addEventListener('pointerdown',e=>dragX=e.clientX);
+scene.addEventListener('pointerup',e=>{
+  if(dragX===null)return;
+  const dx=e.clientX-dragX;
+  if(Math.abs(dx)>40)go(cur+(dx<0?1:-1));
+  dragX=null;});
+let auto=setInterval(()=>go(cur+1),5000);
+scene.addEventListener('mouseenter',()=>clearInterval(auto));
+scene.addEventListener('mouseleave',()=>auto=setInterval(()=>go(cur+1),5000));
+layout();
+
+/* ════════ DETAIL PAGE ════════ */
+const detail=document.getElementById('detail'),inner=document.getElementById('detailInner');
+function openDetail(id){
+  const p=PROJECTS.find(x=>x.id===id);if(!p||p.gh)return;
+  inner.innerHTML=`
+    <div class="detail-tag">${p.tag}</div>
+    <h1 class="detail-title">${p.name}</h1>
+    <div class="detail-stack">${p.stack.map(s=>`<span>${s}</span>`).join('')}</div>
+    <div class="detail-body">
+      ${p.body.map(([h,t])=>`<h3>${h}</h3>${t}`).join('')}
+      ${
+        (p.mediaItems&&p.mediaItems.length)
+        ? `<h3>Demos &amp; Media</h3><div class="media-grid">${p.mediaItems.map(m=>{
+            const frame = m.type==='iframe'
+              ? `<iframe src="${m.src}" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe>`
+              : m.type==='video'
+              ? `<video src="${m.src}" controls preload="metadata" playsinline></video>`
+              : `<img src="${m.src}" alt="${m.cap||''}" loading="lazy">`;
+            const cap = `<div class="cap"><span><b>${m.cap||''}</b>${m.meta?' · '+m.meta:''}</span>${m.link?`<a href="${m.link[1]}" target="_blank" rel="noopener">${m.link[0]}</a>`:''}</div>`;
+            return `<div class="media-item${m.wide?' wide':''}"><div class="frame${m.fit?' fit':''}">${frame}</div>${cap}</div>`;
+          }).join('')}</div>`
+        : (p.media
+            ? `<h3>Demos &amp; Media</h3><div class="media-grid">${Array.from({length:p.media},(_,i)=>
+                `<div class="media-slot">Drop demo ${i+1} here<br>(GIF / image / video)</div>`).join('')}</div>`
+            : '')
+      }
+    </div>
+    <div class="detail-links">${p.links.map(([t,u])=>`<a class="btn btn-primary" href="${u}" target="_blank">${t}</a>`).join('')}
+      <button class="btn btn-ghost" onclick="closeDetail()">← All projects</button></div>`;
+  detail.classList.add('open');document.body.classList.add('detail-locked');
+  detail.scrollTop=0;
+  if(location.hash!=='#/p/'+id)history.pushState(null,'','#/p/'+id);
+}
+function closeDetail(){
+  detail.classList.remove('open');document.body.classList.remove('detail-locked');
+  if(location.hash.startsWith('#/p/'))history.pushState(null,'','#projects');
+}
+document.getElementById('detailBack').onclick=closeDetail;
+flow.addEventListener('click',e=>{
+  const b=e.target.closest('.proj-open');if(b)openDetail(b.dataset.id);});
+addEventListener('popstate',()=>{
+  const m=location.hash.match(/^#\/p\/(\w+)/);
+  m?openDetail(m[1]):closeDetail();});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
+{const m=location.hash.match(/^#\/p\/(\w+)/);if(m)openDetail(m[1]);}
+
+/* ════════ CURSOR ════════ */
+const dot=document.querySelector('.cursor-dot'),ring=document.querySelector('.cursor-ring');
+let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;
+  dot.style.left=mx+'px';dot.style.top=my+'px';});
+document.addEventListener('mousedown',()=>document.body.classList.add('cursor-down'));
+document.addEventListener('mouseup',()=>document.body.classList.remove('cursor-down'));
+(function lerpCur(){rx+=(mx-rx)*.18;ry+=(my-ry)*.18;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(lerpCur);})();
+document.addEventListener('mouseover',e=>{
+  document.body.classList.toggle('cursor-hover',
+    !!e.target.closest('a,button,.res-card,.skill-card,.proj-card,.edu-card,.tl-item'));});
+
+/* ════════ MAGNETIC BUTTONS ════════ */
+document.querySelectorAll('[data-mag]').forEach(b=>{
+  b.addEventListener('mousemove',e=>{
+    const r=b.getBoundingClientRect();
+    const x=(e.clientX-r.left-r.width/2)*.25,y=(e.clientY-r.top-r.height/2)*.35;
+    b.style.transform=`translate(${x}px,${y}px)`;});
+  b.addEventListener('mouseleave',()=>b.style.transform='');
+});
+
+/* ════════ SPOTLIGHT CARDS ════════ */
+document.querySelectorAll('[data-spot]').forEach(c=>{
+  c.addEventListener('mousemove',e=>{
+    const r=c.getBoundingClientRect();
+    c.style.setProperty('--mx',(e.clientX-r.left)+'px');
+    c.style.setProperty('--my',(e.clientY-r.top)+'px');});
+});
+
+/* ════════ TILT ════════ */
+document.querySelectorAll('[data-tilt]').forEach(c=>{
+  c.addEventListener('mousemove',e=>{
+    const r=c.getBoundingClientRect();
+    const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;
+    c.style.transform=`perspective(900px) rotateX(${-py*4}deg) rotateY(${px*5}deg)`;});
+  c.addEventListener('mouseleave',()=>c.style.transform='');
+});
+
+/* ════════ TEXT SCRAMBLE (eyebrow + logo) ════════ */
+function scramble(el,finalText,dur=900){
+  const CH='!<>-_\\/[]{}—=+*^?#01';
+  const t0=performance.now();
+  (function f(now){
+    const k=Math.min(1,(now-t0)/dur);
+    const n=Math.floor(k*finalText.length);
+    el.textContent=finalText.slice(0,n)+[...finalText.slice(n)].map(c=>c===' '?' ':CH[Math.random()*CH.length|0]).join('');
+    if(k<1)requestAnimationFrame(f);else el.textContent=finalText;
+  })(t0);}
+const eyeEl=document.getElementById('scramble'),eyeTxt=eyeEl.textContent;
+setTimeout(()=>scramble(eyeEl,eyeTxt,1100),1500);
+const logo=document.getElementById('logo');
+logo.addEventListener('mouseenter',()=>scramble(logo,'DD/037',500));
+
+/* ════════ COUNT-UP METRICS ════════ */
+function countUp(el){
+  const target=parseFloat(el.dataset.cnt),dec=+(el.dataset.dec||0),suf=el.dataset.suf||'';
+  const t0=performance.now(),DUR=1300;
+  (function f(now){
+    const k=Math.min(1,(now-t0)/DUR),e=1-Math.pow(1-k,3);
+    el.textContent=(target*e).toFixed(dec)+suf;
+    if(k<1)requestAnimationFrame(f);})(t0);}
+const cntIO=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){countUp(e.target);cntIO.unobserve(e.target);}}),{threshold:.6});
+document.querySelectorAll('[data-cnt]').forEach(el=>cntIO.observe(el));
+
+/* ════════ HERO FX ENGINE — 'gyro' | 'cloud' ════════ */
+const HERO_FX='gyro';
+let COLS={pt:'150,190,255',scan:'245,186,80',beam:'245,166,35'};
+function applyCanvasTheme(t){
+  COLS=t==='light'
+    ?{pt:'37,99,235',scan:'190,115,8',beam:'217,142,11'}
+    :{pt:'150,190,255',scan:'245,186,80',beam:'245,166,35'};}
+applyCanvasTheme(document.documentElement.dataset.theme);
+
+const cv=document.getElementById('cloud'),ctx=cv.getContext('2d');
+const scanLabel=document.getElementById('scanLabel');
+let W,H,CXc,CYc,SC;
+function sizeFX(){
+  W=cv.width=innerWidth;H=cv.height=cv.parentElement.offsetHeight;
+  const mobile=W<900;
+  CXc=mobile?W*.5:W*.71;CYc=mobile?H*.40:H*.46;
+  SC=Math.min(W,H)*(mobile?.30:.35);
+  if(scanLabel){scanLabel.style.left=(CXc+SC*1.05)+'px';
+    if(HERO_FX==='gyro')scanLabel.style.top=(CYc-SC*1.05)+'px';}
+}
+sizeFX();addEventListener('resize',sizeFX);
+
+/* ---- ENGINE A: GYROSCOPE / ATTITUDE RIG ---- */
+function startGyro(){
+  const RINGS=[
+    {r:.50,tiltX:.95,sp:.55,ph:0,amber:true,nodes:1,nsp:.9},
+    {r:.76,tiltX:-.55,sp:-.36,ph:2.1,amber:false,nodes:2,nsp:-.6},
+    {r:1.00,tiltX:.32,sp:.24,ph:4.2,amber:false,nodes:2,nsp:.45},
+    {r:1.22,tiltX:-.15,sp:-.16,ph:1.3,amber:false,nodes:3,nsp:-.3}];
+  const SEG=72;
+  let prev=performance.now(),T=0;
+  function frame(now){
+    const dt=Math.min(.05,(now-prev)/1000);prev=now;T+=dt;
+    ctx.clearRect(0,0,W,H);
+    ctx.globalAlpha=W<900?.5:1;
+    const gRY=cpx*.9,gRX=-.28+cpy*.5;
+    const gsy=Math.sin(gRY),gcy=Math.cos(gRY),gsx=Math.sin(gRX),gcx=Math.cos(gRX);
+    const F=3.2;
+    function project(x,y,z){
+      /* global mouse rotation then perspective */
+      let X=x*gcy+z*gsy,Z=-x*gsy+z*gcy;
+      let Y=y*gcx-Z*gsx;Z=y*gsx+Z*gcx;
+      const s=F/(F+Z);
+      return[CXc+X*SC*s,CYc+Y*SC*s,s,Z];
+    }
+    /* core */
+    const corePulse=.5+.5*Math.sin(T*2.2);
+    ctx.fillStyle=`rgba(${COLS.beam},${.55+.35*corePulse})`;
+    ctx.beginPath();ctx.arc(CXc,CYc,3.2+corePulse*1.2,0,7);ctx.fill();
+    ctx.strokeStyle=`rgba(${COLS.beam},${.22*(1-corePulse)})`;
+    ctx.lineWidth=1;
+    ctx.beginPath();ctx.arc(CXc,CYc,10+corePulse*16,0,7);ctx.stroke();
+    /* crosshair ticks */
+    ctx.strokeStyle=`rgba(${COLS.pt},.25)`;
+    [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dx,dy])=>{
+      ctx.beginPath();
+      ctx.moveTo(CXc+dx*SC*1.38,CYc+dy*SC*1.38);
+      ctx.lineTo(CXc+dx*SC*1.46,CYc+dy*SC*1.46);
+      ctx.stroke();});
+    /* rings */
+    RINGS.forEach(rg=>{
+      const a=T*rg.sp+rg.ph;
+      const sa=Math.sin(a),ca=Math.cos(a),st=Math.sin(rg.tiltX),ct=Math.cos(rg.tiltX);
+      const col=rg.amber?COLS.beam:COLS.pt;
+      let prevP=null;
+      for(let i=0;i<=SEG;i++){
+        const th=i/SEG*Math.PI*2;
+        /* ring-local: circle in XZ, tilt about X, spin about Y */
+        let x=rg.r*Math.cos(th),z=rg.r*Math.sin(th),y=0;
+        let y1=y*ct-z*st,z1=y*st+z*ct;          /* tilt */
+        let x2=x*ca+z1*sa,z2=-x*sa+z1*ca;       /* spin */
+        const[px,py,s,Z]=project(x2,y1,z2);
+        if(prevP){
+          const near=Math.max(0,Math.min(1,1-(Z+1.4)/2.8));
+          ctx.strokeStyle=`rgba(${col},${.07+near*.34})`;
+          ctx.lineWidth=(rg.amber?1.3:1)*s;
+          ctx.beginPath();ctx.moveTo(prevP[0],prevP[1]);ctx.lineTo(px,py);ctx.stroke();
+        }
+        prevP=[px,py];
+      }
+      /* tracker nodes */
+      for(let n=0;n<rg.nodes;n++){
+        const th=T*rg.nsp+n*(Math.PI*2/rg.nodes);
+        let x=rg.r*Math.cos(th),z=rg.r*Math.sin(th),y=0;
+        let y1=y*ct-z*st,z1=y*st+z*ct;
+        let x2=x*ca+z1*sa,z2=-x*sa+z1*ca;
+        const[px,py,s]=project(x2,y1,z2);
+        ctx.fillStyle=`rgba(${COLS.scan},.9)`;
+        ctx.beginPath();ctx.arc(px,py,2.4*s,0,7);ctx.fill();
+        ctx.fillStyle=`rgba(${COLS.scan},.18)`;
+        ctx.beginPath();ctx.arc(px,py,6*s,0,7);ctx.fill();
+      }
+    });
+    ctx.globalAlpha=1;
+    if(scanLabel){
+      const roll=(cpy*28).toFixed(1),pitch=(cpx*36).toFixed(1),yaw=((T*12.6)%360).toFixed(1);
+      scanLabel.textContent=`ATT R ${roll}° P ${pitch}° Y ${yaw}° — IMU LOCK`;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---- ENGINE B: PERCEPTION POINT CLOUD (set HERO_FX='cloud') ---- */
+function startCloud(){
+  const NPTS=2300,KP=2,KQ=3,PTS=[];
+  for(let i=0;i<NPTS;i++){
+    const t=Math.random()*Math.PI*2,R=1,r=.42,j=.085;
+    PTS.push({x:(R+r*Math.cos(KQ*t))*Math.cos(KP*t)+(Math.random()-.5)*j*2,
+      y:(R+r*Math.cos(KQ*t))*Math.sin(KP*t)+(Math.random()-.5)*j*2,
+      z:r*Math.sin(KQ*t)*1.4+(Math.random()-.5)*j*2,tw:Math.random()*6.28});}
+  let rotY=0,prev=performance.now();
+  function frame(now){
+    const dt=Math.min(.05,(now-prev)/1000);prev=now;rotY+=dt*.22;
+    const ry=rotY+cpx*.9,rxA=-.35+cpy*.5;
+    const sy=Math.sin(ry),cy_=Math.cos(ry),sx=Math.sin(rxA),cx_=Math.cos(rxA);
+    ctx.clearRect(0,0,W,H);ctx.globalAlpha=W<900?.5:1;
+    const scanT=(Math.sin(now*.00045)+1)/2;
+    const top=CYc-SC*1.15,bot=CYc+SC*1.15,scanY=top+(bot-top)*scanT;
+    const g=ctx.createLinearGradient(CXc-SC*1.6,0,CXc+SC*1.6,0);
+    g.addColorStop(0,`rgba(${COLS.beam},0)`);g.addColorStop(.5,`rgba(${COLS.beam},.30)`);g.addColorStop(1,`rgba(${COLS.beam},0)`);
+    ctx.fillStyle=g;ctx.fillRect(CXc-SC*1.6,scanY-1,SC*3.2,2);
+    const F=3.2;
+    for(const p of PTS){
+      const x=p.x*cy_+p.z*sy,z=-p.x*sy+p.z*cy_;
+      const y2=p.y*cx_-z*sx,z2=p.y*sx+z*cx_;
+      const s=F/(F+z2);
+      const px=CXc+x*SC*s,py=CYc+y2*SC*s;
+      const near=1-Math.max(0,Math.min(1,(z2+1.6)/3.2));
+      const dScan=Math.abs(py-scanY);
+      let size=(1.1+near*1.3)*s,a,col;
+      if(dScan<14){const k=1-dScan/14;col=COLS.scan;a=.35+.65*k;size+=k*1.5;}
+      else{col=COLS.pt;a=.10+near*.38*(.75+.25*Math.sin(p.tw+now*.001));}
+      ctx.fillStyle=`rgba(${col},${a})`;ctx.fillRect(px,py,size,size);
+    }
+    ctx.globalAlpha=1;
+    if(scanLabel){scanLabel.textContent='SCAN '+scanT.toFixed(3)+' — '+NPTS+' PTS — DEPTH STREAM OK';
+      scanLabel.style.top=(scanY-16)+'px';}
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+(HERO_FX==='gyro'?startGyro:startCloud)();
+
+/* ════════ HERO MOUSE PARALLAX ════════ */
+const plx=[
+  [document.getElementById('plxBlobs'),22],
+  [document.getElementById('plxGrid'),10],
+  [document.getElementById('plxContent'),-8]];
+let pmx=0,pmy=0,cpx=0,cpy=0;
+document.querySelector('.hero').addEventListener('mousemove',e=>{
+  pmx=(e.clientX/innerWidth-.5);pmy=(e.clientY/innerHeight-.5);});
+(function plxLoop(){cpx+=(pmx-cpx)*.05;cpy+=(pmy-cpy)*.05;
+  plx.forEach(([el,f])=>{if(!el)return;
+    el.style.transform=`translate3d(${cpx*f}px,${cpy*f}px,0)`;});
+  requestAnimationFrame(plxLoop);})();
+
+/* ════════ SCROLL: progress bar + nav + timeline draw ════════ */
+const sprog=document.getElementById('sprog'),nav=document.getElementById('nav');
+const tlEl=document.getElementById('tl'),tlLine=document.getElementById('tlLine');
+function onScroll(){
+  const max=document.documentElement.scrollHeight-innerHeight;
+  sprog.style.width=(scrollY/max*100)+'%';
+  nav.classList.toggle('scrolled',scrollY>60);
+  const r=tlEl.getBoundingClientRect();
+  const prog=Math.min(1,Math.max(0,(innerHeight*.75-r.top)/r.height));
+  tlLine.style.height=(prog*(r.height-12))+'px';
+}
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+/* ════════ MARQUEE duplicate ════════ */
+const mq=document.getElementById('marq');mq.innerHTML+=mq.innerHTML;
+
+/* ════════ REVEAL + NAV ACTIVE ════════ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+const navLinks=[...document.querySelectorAll('.nav-links a')];
+const navIO=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting)navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));
+}),{rootMargin:'-40% 0px -55% 0px'});
+document.querySelectorAll('section,footer').forEach(s=>navIO.observe(s));
+
+/* ════════ MOBILE MENU + COPY EMAIL ════════ */
+const burger=document.getElementById('burger'),mm=document.getElementById('mobileMenu');
+burger.onclick=()=>{burger.classList.toggle('open');mm.classList.toggle('open');};
+mm.querySelectorAll('a').forEach(a=>a.onclick=()=>{burger.classList.remove('open');mm.classList.remove('open');});
+const ce=document.getElementById('copyEmail');
+ce.onclick=()=>{navigator.clipboard.writeText('dhyanmnd037@gmail.com').then(()=>{
+  ce.classList.add('copied');setTimeout(()=>ce.classList.remove('copied'),1800);});};
+
+/* ════════ THEME TOGGLE ════════ */
+const themeBtn=document.getElementById('themeBtn'),rootEl=document.documentElement;
+function setTheme(t){
+  rootEl.classList.add('theming');
+  rootEl.dataset.theme=t;
+  applyCanvasTheme(t);
+  themeBtn.textContent=t==='light'?'◑':'◐';
+  try{localStorage.setItem('theme',t)}catch(e){}
+  setTimeout(()=>rootEl.classList.remove('theming'),420);
+}
+themeBtn.textContent=rootEl.dataset.theme==='light'?'◑':'◐';
+themeBtn.onclick=()=>setTheme(rootEl.dataset.theme==='light'?'dark':'light');
+</script>
+</body>
+</html>
